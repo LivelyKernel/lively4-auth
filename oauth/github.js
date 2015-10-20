@@ -7,7 +7,8 @@ function onAuthCallback() {
     }
 
     var code = codeInfo["code"]
-    jQuery.get("../github_accesstoken?code=" + code, 
+    var state = codeInfo["state"]
+    jQuery.get("../github_accesstoken?code=" + code + "&state="+state, 
 	       function(data, status, xhr) {
 		   var authInfo = parseAuthInfoFromUrl(data)
 		   window.opener.githubAuth.onAuthenticated(window.uuid, authInfo);

@@ -1,11 +1,20 @@
 'use strict';
 
+function guid() {
+    function s4() {
+	return Math.floor((1 + Math.random()) * 0x10000)
+	    .toString(16)
+	    .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+	s4() + '-' + s4() + s4() + s4();
+}
+
 window.githubAuth = {
 
     onAuthenticated: function(windowUuid, token) {
 
 	alert("yes, we are authenticated " + JSON.stringify(token))
-
     },
 	
     challengeForAuth: function() {
@@ -34,21 +43,25 @@ window.githubAuth = {
 	    if (!popup) {
 	        alert("failed to pop up auth window");
 	    }
-	    // popup.uuid = lively.net.CloudStorage.addPendingRequest(req);
+	    
 	    popup.focus();
 	}
 
-    var appInfo = {
-	        "clientId": "21b67bb82b7af444a7ef",
-	        // "redirectUri": "https://livelykernel.github.io/lively4-core/oauth/github.html"
-	        "redirectUri": "https://lively-kernel.org/lively4-auth/oauth/github.html"
-	 };
-    var url =
-        "https://github.com/login/oauth/authorize/" +
-        "?client_id=" + appInfo.clientId +
-        "&response_type=token" +
-        // "&state=" + uuid +
-        "&redirect_uri=" + encodeURIComponent(appInfo.redirectUri);
-    popup(url);
+	var appInfo = {
+	    "clientId": "21b67bb82b7af444a7ef",
+	    "redirectUri": "https://lively-kernel.org/lively4-auth/oauth/github.html"
+	};
+	var uuid = guid();
+	var url =
+            "https://github.com/login/oauth/authorize/" +
+            "?client_id=" + appInfo.clientId +
+            "&response_type=token" +
+            "&state=" + uuid +
+            "&redirect_uri=" + encodeURIComponent(appInfo.redirectUri);
+
+	$.get("../open_github_accesstoken?state="+uuid, null, function(data){
+	    alert("challenge got a token, too: " + data)
+	})
+	popup(url);
     }
 }

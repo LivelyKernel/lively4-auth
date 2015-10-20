@@ -14,14 +14,28 @@ var mimeTypes = {
     "js": "text/javascript",
     "css": "text/css"};
 
+var openrequests = {}
+
 http.createServer(function(req, res) {
     var uri = url.parse(req.url, true);
 
+
+    console.log("request " + uri.pathname)	
+
+    if (uri.pathname.match("open_github_accesstoken")) {
+	var state =  uri.query.state
+	openrequests[state] = res // remember the request for answering later
+	
+	console.log("add pending request " + state)	
+	// don't answer it directly here but keep waiting
+	return 
+    }    
+
     if (uri.pathname.match("github_accesstoken")) {
 	var code =  uri.query.code
+	var state = uri.query.state
 	
 	// console.log('curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d \'{"client_id":"21b67bb82b7af444a7ef", "client_secret":"e9ae61b190c5f82a9e3d6d0d2f97e8ad4ba29d18","code":"' + code +'", "state":""}\' https://github.com/login/oauth/access_token')
-	// return
 
 	// here we ask github
 	var req = https.request({
@@ -32,11 +46,24 @@ http.createServer(function(req, res) {
 		'Content-type': 'application/json'
 	    }
 	}, function(response) {
+	    console.log("status code: " + response.statusCode)
 	    var data = ""
             response.on('data', function(d) {
 		data += d;
             });
             response.on('end', function() {
+		// also answer any open requests first
+		console.log("got from github: " + data)
+
+		var pendingreq = openrequests[state]
+		if (pendingreq) {
+		    pendingreq.writeHead(200, {'Content-Type': 'text/html'});
+		    pendingreq.write(data);
+		    pendingreq.end();
+		} else {
+		    console.log("no pending request for: " + state)
+		}
+
 		// res.writeHead(200, {'Content-Type': 'text/plain'});
 		// res.write('The token was: ' + data);
 		res.writeHead(200, {'Content-Type': 'text/html'});
@@ -48,7 +75,7 @@ http.createServer(function(req, res) {
 		"client_id":"21b67bb82b7af444a7ef",
 		"client_secret":"e9ae61b190c5f82a9e3d6d0d2f97e8ad4ba29d18",
 		"code": ""+code, 
-		"state": ""
+		"state": ""+state
 	    })
 	console.log("Post: " + json)
 	req.write(json)

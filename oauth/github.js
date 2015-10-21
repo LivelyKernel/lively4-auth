@@ -10,9 +10,13 @@ function onAuthCallback() {
     var state = codeInfo["state"]
     jQuery.get("../github_accesstoken?code=" + code + "&state="+state, 
 	       function(data, status, xhr) {
-		   var authInfo = parseAuthInfoFromUrl(data)
-		   window.opener.githubAuth.onAuthenticated(window.uuid, authInfo);
-		   window.close()
+		   try {
+		       var authInfo = parseAuthInfoFromUrl(data)
+		       window.close()
+		   } catch(e) {
+		       alert("could not parse github answer: " + data)
+		   }
+		   // window.opener.githubAuth.onAuthenticated(window.uuid, authInfo);
     	       })
 }
 

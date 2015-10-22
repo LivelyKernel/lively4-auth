@@ -54,6 +54,8 @@ http.createServer(function(req, res) {
             response.on('end', function() {
 		// also answer any open requests first
 		console.log("got from github: " + data)
+		data += "&state=" + state
+		console.log("added state to data: " + data)
 
 		var pendingreq = openrequests[state]
 		if (pendingreq) {

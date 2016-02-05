@@ -1,5 +1,8 @@
 'use strict';
 
+/* This is an example application that demonstrates how to get a token from github 
+   (through our lively4-authentification service */
+
 function guid() {
     function s4() {
 	return Math.floor((1 + Math.random()) * 0x10000)
@@ -11,12 +14,7 @@ function guid() {
 }
 
 window.githubAuth = {
-
-    onAuthenticated: function(windowUuid, token) {
-
-	alert("yes, we are authenticated " + JSON.stringify(token))
-    },
-	
+    // (1) Start authentification
     challengeForAuth: function() {
 	function popup(url) {
 	    var width = 525,
@@ -60,8 +58,17 @@ window.githubAuth = {
             "&redirect_uri=" + encodeURIComponent(appInfo.redirectUri);
 
 	$.get("../open_github_accesstoken?state="+uuid, null, function(data){
-	    alert("challenge got a token, too: " + data)
+	    // #TODO we should parse the data
+	    githubAuth.onAuthenticated(data)
+	}).fail(function(err) {
+	    alert("error: " + err );
 	})
 	popup(url);
-    }
+    },
+    
+    // (2) Called when we are authentifacted
+    onAuthenticated: function(data) {
+	// just print it and do nothing with it... it's a demo!
+	alert("yes, we are authenticated " + JSON.stringify(data))
+    },
 }

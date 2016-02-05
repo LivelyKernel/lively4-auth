@@ -8,16 +8,12 @@ function onAuthCallback() {
         state = authInfo["state"];
     // #TODO we don't use expery at the moment
     var expiry = parseInt(authInfo["expires_in"] || (48 * 60 * 60));
-      
-    jQuery.get("../dropbox_accesstoken?token=" + token + "&state="+state, 
-	       function(data, status, xhr) {
-		   try {
-		       alert("we just delivered the real token:" + token)
-		       window.close()
-		   } catch(e) {
-		       alert("something went wrong: " + data)
-		   }
-    	       })
+    jQuery.get(
+	"../dropbox_accesstoken?token=" + token + "&state="+state + "&expires_in="+expiry, 
+	function(data, status, xhr) {
+	    // we just delivered the real token
+	    window.close()
+    	})
 }
 
 function getAuthInfoFromUrl() {

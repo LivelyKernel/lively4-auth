@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <!-- This is the redirect URL that is called from dropbox -->
+        <title></title>
+    </head>
+    <body>
+    	<script type="text/javascript" src="../lib/focalStorage.js"></script>
+    	<script src="../lib/jquery-2.1.4.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" src="dropbox.js"></script>
+        <script type="text/javascript">
+            onAuthCallback() // Do something with token that dropbox provided
+        </script>
+    </body>
+</html>

@@ -25,16 +25,23 @@ function answerPendingRequest(state, data) {
     var pendingreq = openrequests[state]
     if (pendingreq) {
 	console.log("answer pending request: " + data)
+	allowCrossOrigin(pendingreq)
 	pendingreq.writeHead(200, {'Content-Type': 'text/html'});
 	pendingreq.write(data);
 	pendingreq.end();
     } else {
-	    console.log("no pending request for: " + state)
+	console.log("no pending request for: " + state)
     }
+}
+
+function allowCrossOrigin(res){
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
 }
 
 function respondSuccess(res) {
     // we don't need to write anything back...
+    allowCrossOrigin(res)
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('Everthing is nice!');
     res.end()
@@ -47,18 +54,19 @@ function serveFile(req, res) {
     fs.exists(filename, function(exists) {
         if(!exists) {
             console.log("not exists: " + filename);
+	    allowCrossOrigin(res)
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.write('404 Not Found\n');
             res.end();
-        }
-        var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
-        res.writeHead(200, mimeType);
-
-	if(exists) {
-            var fileStream = fs.createReadStream(filename);
-            fileStream.pipe(res);
+        } else {
+            var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
+            allowCrossOrigin(res)
+	    res.writeHead(200, mimeType)
+	    if(exists) {
+		var fileStream = fs.createReadStream(filename);
+		fileStream.pipe(res);
+	    }
 	}
-
     });
 }
 
@@ -117,6 +125,7 @@ function setGithubAccessToken(req, res) {
     codeToTokenRequest.write(json)
     codeToTokenRequest.on('error', function(e) {
 	console.error(e);
+	allowCrossOrigin(res)
 	res.writeHead(400, {'Content-Type': 'text/plain'});
 	res.write('There was an error: ' + e);
 	res.end();

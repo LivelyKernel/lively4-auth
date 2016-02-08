@@ -19,16 +19,27 @@ var mimeTypes = {
     "css": "text/css"};
 
 var openrequests = {}
+var lasttokens = {} // security whole
+
+// #TODO: garbage collect remembered tokens after a while? (e.g. 1hour)
+
+function rememberToken(state, data) {
+    lasttokens[state] = {state: state, data: data, time: Date.now()}
+}
+
 
 function answerPendingRequest(state, data) {
     // continue with registered request from (1)
-    var pendingreq = openrequests[state]
-    if (pendingreq) {
-	console.log("answer pending request: " + data)
-	allowCrossOrigin(pendingreq)
-	pendingreq.writeHead(200, {'Content-Type': 'text/html'});
-	pendingreq.write(data);
-	pendingreq.end();
+    var pendingreqs = openrequests[state]
+    if (pendingreqs) {
+	var pendingreq
+	while(pendingreq = pendingreqs.shift()) { 
+	    console.log("answer pending request: " + data)
+	    allowCrossOrigin(pendingreq)
+	    pendingreq.writeHead(200, {'Content-Type': 'text/html'});
+	    pendingreq.write(data);
+	    pendingreq.end();
+	}
     } else {
 	console.log("no pending request for: " + state)
     }
@@ -73,7 +84,16 @@ function serveFile(req, res) {
 function registerPendingRequest(req, res) {
     var uri = url.parse(req.url, true);
     var state =  uri.query.state
-    openrequests[state] = res // remember the request for answering later
+
+    if (! openrequests[state]) openrequests[state] = [];
+    openrequests[state].push(res) // remember the request for answering later
+
+    if (lasttokens[state]) {
+	// Answer it directly
+	answerPendingRequest(state, lasttokens[state].data)	
+	return 
+    } 
+
     console.log("add pending request " + state)	
     // don't answer it directly here but keep waiting 
 }
@@ -86,6 +106,7 @@ function setDropboxAccessToken(req, res) {
     console.log("set dropbox token: " + token)
 	
     var data = querystring.stringify({token: token, state: state, expires_in: expires_in})
+    rememberToken(state, data)
     answerPendingRequest(state, data)
     respondSuccess(res)
 }
@@ -118,6 +139,7 @@ function setGithubAccessToken(req, res) {
 	    // also answer any open requests first
 	    console.log("got from github: " + data)
 	    data += "&state=" + state
+	    rememberToken(state, data)
 	    answerPendingRequest(state, data)
 	    respondSuccess(res)
         });

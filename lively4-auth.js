@@ -81,6 +81,7 @@ function serveFile(req, res) {
   });
 }
 
+
 function registerPendingRequest(req, res) {
   var uri = url.parse(req.url, true);
   var state =  uri.query.state
@@ -170,6 +171,20 @@ function setGoogledriveAccessToken(req, res) {
   respondSuccess(res)
 }
 
+function setMicrosoftAccessToken(req, res) {
+  var uri = url.parse(req.url, true);
+  var token =  uri.query.token
+  var state = uri.query.state
+  var expires_in = uri.query.expires_in
+  console.log("set microsoft token: " + token)
+
+  var data = querystring.stringify({token: token, state: state, expires_in: expires_in})
+  rememberToken(state, data)
+  answerPendingRequest(state, data)
+  respondSuccess(res)
+}
+
+
 
 // SERVER LOGIC
 http.createServer(function(req, res) {
@@ -192,6 +207,12 @@ http.createServer(function(req, res) {
   if (uri.pathname.match("googledrive_accesstoken")) {
     return setGoogledriveAccessToken(req, res)
   }
+
+  // (2d) set google drive key (from token)
+  if (uri.pathname.match("microsoft_accesstoken")) {
+    return setMicrosoftAccessToken(req, res)
+  }
+
   
   // DEFAULT
   serveFile(req, res)

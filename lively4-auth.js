@@ -10,6 +10,21 @@ var http = require('http'),
   https = require('https'),
   querystring = require('querystring');
 
+
+
+var services = {
+  microsoft: {
+    name: "Microsoft",
+    openTokenURL: "https://lively-kernel.org/lively4-auth/open_microsoft_accesstoken",
+    tokenURL: "https://lively-kernel.org/lively4-auth/microsoft_accesstoken",
+    url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    scope: "openid",
+    clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
+    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/microsoft.html"
+  }
+} 
+
+
 var mimeTypes = {
   "html": "text/html",
   "jpeg": "image/jpeg",
@@ -82,16 +97,6 @@ function serveFile(req, res) {
   });
 }
 
-var services = {
-  microsoft: {
-    name: "Microsoft",
-    tokenurl: "https://lively-kernel.org/lively4-auth/open_microsoft_accesstoken",
-    url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    scope: "openid",
-    clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
-    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/microsoft.html"
-  }
-} 
 
 var guidFunctionDefinition = `
   function guid() {
@@ -157,7 +162,7 @@ function oauthRequestHTML(service) {
         "&state=" + uuid +
         "&redirect_uri=" + encodeURIComponent(oauthConfig.redirectUri);
 
-      fetch(oauthConfig.tokenurl + "?state=" + uuid).then(r => r.text()).then(data => {
+      fetch(oauthConfig.openTokenURL + "?state=" + uuid).then(r => r.text()).then(data => {
         onAuthenticated(data)
       }).catch(err => {
         alert("error: " + err);
@@ -169,8 +174,6 @@ function oauthRequestHTML(service) {
 </head>
 <h1>Lively4 ${service.name} Authentification Test Page</h1>
 `}
-
-
 
 
 function testOAuthRequest(req, res) {
@@ -190,6 +193,23 @@ function testOAuthRequest(req, res) {
   }
 }
 
+/* get the app data config for a service */
+function configServiceRequest(req, res) {
+  var uri = url.parse(req.url, true);  
+  var serviceName = uri.path.replace(/\/.*\//,"")
+  var service = services[serviceName]
+  
+  allowCrossOrigin(res)
+  if (service) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.write(JSON.stringify(service, undefined, 2));
+    res.end(); 
+  } else {
+    res.writeHead(300, { 'Content-Type': 'text/plain' });
+    res.write(`No congif for service found: ${serviceName}\n`);
+    res.end(); 
+  }
+}
 
 function oauth2EndpointHTML(service) {
   return `
@@ -204,7 +224,7 @@ function oauth2EndpointHTML(service) {
         var expiry = parseInt(authInfo["expires_in"] || (48 * 60 * 60));
 
         fetch(
-          "https://lively-kernel.org/lively4-auth/microsoft_accesstoken?token=" + token + "&state="+state + "&expires_in="+expiry).then(r => r.text()).then((data, status, xhr) => {
+          "${service.tokenURL}?token=" + token + "&state="+state + "&expires_in="+expiry).then(r => r.text()).then((data, status, xhr) => {
             window.close() // and we do nothing with it, 
           })
     }
@@ -381,6 +401,12 @@ http.createServer(function(req, res) {
     return testOAuthRequest(req, res)
   }
 
+  // oauth congig
+  if (uri.pathname.match(/config\/.*/)) {
+    return configServiceRequest(req, res)
+  }
+
+  
   // app callback
   if (uri.pathname.match(/oauth2\/.*/)) {
     return oauth2Request(req, res)

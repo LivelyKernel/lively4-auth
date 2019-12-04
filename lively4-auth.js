@@ -18,7 +18,7 @@ var services = {
     openTokenURL: "https://lively-kernel.org/lively4-auth/open_microsoft_accesstoken",
     tokenURL: "https://lively-kernel.org/lively4-auth/microsoft_accesstoken",
     url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    scope: "openid",
+    scope: "https://graph.microsoft.com/.default",
     clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
     iconURL: "http://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE2qVsJ?ver=3f74",
     redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/microsoft.html"

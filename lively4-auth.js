@@ -22,6 +22,15 @@ var services = {
     clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
     iconURL: "http://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE2qVsJ?ver=3f74",
     redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/microsoft.html"
+  },
+  google: {
+    name: "Google",
+    openTokenURL: "https://lively-kernel.org/lively4-auth/open_google_accesstoken",
+    tokenURL: "https://lively-kernel.org/lively4-auth/google_accesstoken",
+    url: "https://lively-kernel.org/lively4-auth/oauth2/google.html",
+    scope: "https://www.googleapis.com/auth/drive",
+    clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com",
+    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/google.html"
   }
 } 
 

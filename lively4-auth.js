@@ -27,7 +27,7 @@ var services = {
     name: "Google",
     openTokenURL: "https://lively-kernel.org/lively4-auth/open_google_accesstoken",
     tokenURL: "https://lively-kernel.org/lively4-auth/google_accesstoken",
-    url: "https://lively-kernel.org/lively4-auth/oauth2/google.html",
+    url: "https://accounts.google.com/o/oauth2/v2/auth",
     scope: "https://www.googleapis.com/auth/drive",
     clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com",
     redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/google.html"

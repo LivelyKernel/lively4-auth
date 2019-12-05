@@ -1,8 +1,7 @@
 /*
  * Lively4 Authentification Service
- * (C) 2015,2016 SWA Group HPI, MIT Licence, 
+ * (C) 2015-19 SWA Group HPI, MIT Licence, 
  */
-
 var http = require('http'),
   url = require('url'),
   path = require('path'),
@@ -10,39 +9,39 @@ var http = require('http'),
   https = require('https'),
   querystring = require('querystring');
 
-
 // #TODO refactor this to generate openTokenURL,  tokenURL
-var services = {
-  microsoft: {
-    name: "Microsoft",
-    openTokenURL: "https://lively-kernel.org/lively4-auth/open_microsoft_accesstoken",
-    tokenURL: "https://lively-kernel.org/lively4-auth/microsoft_accesstoken",
-    url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    scope: "https://graph.microsoft.com/.default",
-    clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
-    iconURL: "http://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE2qVsJ?ver=3f74",
-    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/microsoft.html"
-  },
-  // see https://console.developers.google.com/apis/credentials/oauthclient to config
-  google: {
-    name: "Google",
-    openTokenURL: "https://lively-kernel.org/lively4-auth/open_google_accesstoken",
-    tokenURL: "https://lively-kernel.org/lively4-auth/google_accesstoken",
-    url: "https://accounts.google.com/o/oauth2/v2/auth",
-    scope: "https://www.googleapis.com/auth/drive",
-    clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com",
-    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/google.html"
-  },
-  gmail: {
-    name: "Gmail",
-    openTokenURL: "https://lively-kernel.org/lively4-auth/open_gmail_accesstoken",
-    tokenURL: "https://lively-kernel.org/lively4-auth/gmail_accesstoken",
-    url: "https://accounts.google.com/o/oauth2/v2/auth",
-    scope: "https://mail.google.com/",
-    clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com",
-    redirectUri: "https://lively-kernel.org/lively4-auth/oauth2/gmail.html"
-  }
-} 
+var services = {}
+
+function registerService(config) {
+  var base = `https://lively-kernel.org/lively4-auth`
+  config.openTokenURL = `${base}/open_${config.name}_accesstoken`
+  config.tokenURL =  `${base}/${config.name}_accesstoken`
+  config.redirectUri = `${base}/oauth2/${config.name}.html`
+  services[config.name] = config
+}
+
+registerService({
+  name: "microsoft",
+  url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+  scope: "https://graph.microsoft.com/.default",
+  clientId: "a1488489-940a-4c2a-ad0e-e95f8b6fd765",
+  iconURL: "http://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE2qVsJ?ver=3f74",
+})
+
+// see https://console.developers.google.com/apis/credentials/oauthclient to config
+registerService({
+   name: "google",
+   url: "https://accounts.google.com/o/oauth2/v2/auth",
+   scope: "https://www.googleapis.com/auth/drive",
+   clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com"
+})
+
+registerService({
+  name: "gmail",
+  url: "https://accounts.google.com/o/oauth2/v2/auth",
+  scope: "https://mail.google.com/",
+  clientId: "496345732081-retia6hpqu8m61q7o6lkc0taelqhsug6.apps.googleusercontent.com"
+}) 
 
 
 var mimeTypes = {

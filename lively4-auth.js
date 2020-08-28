@@ -73,7 +73,7 @@ function answerPendingRequest(state, data) {
 
 function allowCrossOrigin(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, lively-fetch");
 }
 
 function respondSuccess(res) {

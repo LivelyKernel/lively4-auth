@@ -389,8 +389,8 @@ function setDrawioGithubAccessToken(req, res) {
       console.log("got from github (draw.io): " + data)
       
       // Parse the GitHub response to extract access_token
-      var params = new URLSearchParams(data);
-      var access_token = params.get('access_token');
+      var params = querystring.parse(data);
+      var access_token = params.access_token;
       
       if (access_token) {
         // Return JSON format that draw.io expects

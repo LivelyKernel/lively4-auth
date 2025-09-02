@@ -362,6 +362,17 @@ function setGithubAccessToken(req, res) {
 
 function setDrawioGithubAccessToken(req, res) {
   var uri = url.parse(req.url, true);
+  
+  // Handle getState=1 request (draw.io asks for a state token first)
+  if (uri.query.getState === '1') {
+    var stateToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    allowCrossOrigin(res)
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.write(stateToken);
+    res.end();
+    return;
+  }
+  
   var code = uri.query.code
   var state = uri.query.state
   var json = querystring.stringify({

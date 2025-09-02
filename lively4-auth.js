@@ -404,10 +404,28 @@ function setDrawioGithubAccessToken(req, res) {
       var access_token = params.access_token;
       
       if (access_token) {
-        // Return JSON format that draw.io expects
+        // Return HTML that closes popup and sends token to parent (draw.io)
+        var html = `
+        <html>
+        <head><title>GitHub Authorization</title></head>
+        <body>
+        <script>
+          if (window.opener) {
+            // Send token to parent window (draw.io)
+            window.opener.onGitHubCallback && window.opener.onGitHubCallback(null, '${access_token}');
+            window.close();
+          } else {
+            // Fallback: show JSON for debugging
+            document.body.innerHTML = '${JSON.stringify({ access_token: access_token })}';
+          }
+        </script>
+        <p>Authorization successful. This window should close automatically.</p>
+        </body>
+        </html>`;
+        
         allowCrossOrigin(res)
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.write(JSON.stringify({ access_token: access_token }));
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write(html);
         res.end();
       } else {
         // Handle error case

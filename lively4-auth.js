@@ -360,6 +360,51 @@ function setGithubAccessToken(req, res) {
   console.log("request: " + codeToTokenRequest.path)
 }
 
+function setDrawioGithubAccessToken(req, res) {
+  var uri = url.parse(req.url, true);
+  var code = uri.query.code
+  var state = uri.query.state
+  var json = querystring.stringify({
+    "client_id": "Iv23li2bAK5obga5PbSC",
+    "client_secret": "4baf3c97929a47f157232dc79f8f90cab4400dfe",
+    "code": "" + code,
+    "state": "" + state
+  })
+  // here we ask github
+  var codeToTokenRequest = https.request({
+    host: 'github.com',
+    path: '/login/oauth/access_token',
+    method: 'POST',
+    header: {
+      'Content-type': 'application/json'
+    }
+  }, function(response) {
+    console.log("status code: " + response.statusCode)
+    var data = ""
+    response.on('data', function(d) {
+      data += d;
+    });
+    response.on('end', function() {
+      // also answer any open requests first
+      console.log("got from github (draw.io): " + data)
+      data += "&state=" + state
+      rememberToken(state, data)
+      answerPendingRequest(state, data)
+      respondSuccess(res)
+    });
+  })
+  codeToTokenRequest.write(json)
+  codeToTokenRequest.on('error', function(e) {
+    console.error(e);
+    allowCrossOrigin(res)
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.write('There was an error: ' + e);
+    res.end();
+  });
+  codeToTokenRequest.end();
+  console.log("request: " + codeToTokenRequest.path)
+}
+
 
 function setGoogledriveAccessToken(req, res) {
   var uri = url.parse(req.url, true);
@@ -419,6 +464,10 @@ http.createServer(function(req, res) {
   // (2b) set github key (from token)
   if (uri.pathname.match("github_accesstoken")) {
     return setGithubAccessToken(req, res)
+  }
+  // (2b2) set draw.io github key (from token)
+  if (uri.pathname.match("github2")) {
+    return setDrawioGithubAccessToken(req, res)
   }
   // (2c) set google drive key (from token)
   if (uri.pathname.match("googledrive_accesstoken")) {

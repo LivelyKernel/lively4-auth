@@ -387,10 +387,24 @@ function setDrawioGithubAccessToken(req, res) {
     response.on('end', function() {
       // also answer any open requests first
       console.log("got from github (draw.io): " + data)
-      data += "&state=" + state
-      rememberToken(state, data)
-      answerPendingRequest(state, data)
-      respondSuccess(res)
+      
+      // Parse the GitHub response to extract access_token
+      var params = new URLSearchParams(data);
+      var access_token = params.get('access_token');
+      
+      if (access_token) {
+        // Return JSON format that draw.io expects
+        allowCrossOrigin(res)
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.write(JSON.stringify({ access_token: access_token }));
+        res.end();
+      } else {
+        // Handle error case
+        allowCrossOrigin(res)
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.write('Failed to get access token from GitHub: ' + data);
+        res.end();
+      }
     });
   })
   codeToTokenRequest.write(json)

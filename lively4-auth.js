@@ -411,8 +411,8 @@ function setDrawioGithubAccessToken(req, res) {
         <body>
         <script>
           if (window.opener && window.opener.onGitHubCallback) {
-            // Send token to parent window (draw.io) - parameters: (error, token)
-            window.opener.onGitHubCallback(null, '${access_token}');
+            // Send token to parent window (draw.io) - parameters: (error, token_object)
+            window.opener.onGitHubCallback(null, { access_token: '${access_token}' });
             window.close();
           } else {
             // Debug: show what's available

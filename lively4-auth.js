@@ -410,13 +410,15 @@ function setDrawioGithubAccessToken(req, res) {
         <head><title>GitHub Authorization</title></head>
         <body>
         <script>
-          if (window.opener) {
-            // Send token to parent window (draw.io)
-            window.opener.onGitHubCallback && window.opener.onGitHubCallback(null, '${access_token}');
+          if (window.opener && window.opener.onGitHubCallback) {
+            // Send token to parent window (draw.io) - parameters: (error, token)
+            window.opener.onGitHubCallback(null, '${access_token}');
             window.close();
           } else {
-            // Fallback: show JSON for debugging
-            document.body.innerHTML = '${JSON.stringify({ access_token: access_token })}';
+            // Debug: show what's available
+            console.log('window.opener:', window.opener);
+            console.log('onGitHubCallback:', window.opener ? window.opener.onGitHubCallback : 'no opener');
+            document.body.innerHTML = '<p>Debug: access_token = ${access_token}</p><p>opener: ' + !!window.opener + '</p><p>callback: ' + (window.opener ? !!window.opener.onGitHubCallback : 'no opener') + '</p>';
           }
         </script>
         <p>Authorization successful. This window should close automatically.</p>
